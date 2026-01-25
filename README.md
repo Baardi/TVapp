@@ -75,3 +75,10 @@ In case you're having any issues, refer to [Connection Guide](https://developer.
 
 ## Credits
 This app is an experiment by Kaash Dev Seetohul.
+
+## Open Source
+
+This project is part of the **Tizen Community Packages**, an open-source ecosystem of community-maintained Tizen applications.
+
+Explore more projects at:  
+[https://github.com/PatrickSt1991/tizen-community-packages](https://github.com/PatrickSt1991/tizen-community-packages)
