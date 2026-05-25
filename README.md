@@ -74,7 +74,7 @@ In case you're having any issues, refer to [Connection Guide](https://developer.
   - [JavaScript](https://www.w3schools.com/js/)
 
 ## Credits
-This app is an experiment by Kaash Dev Seetohul.
+This app is an experiment by Kaash Dev Seetohul. I'm never buying a samsung TV ever again.
 
 ## Open Source
 
