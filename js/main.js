@@ -3,11 +3,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var videoPlayer = document.getElementById('videoPlayer');
     var channels = [
-        { name: 'Channel 1', url: 'add your m3u8 link here' },//add your channel name and links
-        { name: 'Channel 2', url: 'add your m3u8 link here' },
-        { name: 'Channel 3', url: 'add your m3u8 link here' }
+        { name: 'NRK 1', url: 'https://nrk-live-no.akamaized.net/nrk1_dk7/muxed.m3u8' },
+        { name: 'NRK 2', url: 'https://nrk-live-no.akamaized.net/nrk2/muxed.m3u8' },
+        { name: 'NRK 3', url: 'https://nrk-live-no.akamaized.net/nrk3/muxed.m3u8' },
+        { name: 'NRK Super', url: 'https://nrk-live-no.akamaized.net/nrksuper/muxed.m3u8' },
+        { name: 'NRK Teiknspråk', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' }        
         
-        
+
     ];
     var currentChannelIndex = 0;
 
