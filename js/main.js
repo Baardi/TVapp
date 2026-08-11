@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Display the channel banner
-        showChannelBanner(currentChannels[index].name);
+        showChannelBanner(index + 1, currentChannels[index].name);
     }
 
     function getCurrentChannels() {
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loadChannel(currentRadioChannelIndex);
     }
 
-    function showChannelBanner(channelName) {
+    function showChannelBanner(channelNumber, channelName) {
         var banner = document.getElementById('channelBanner');
         if (!banner) {
             banner = document.createElement('div');
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
             banner.style.paddingBottom = '10px';
             document.body.appendChild(banner);
         }
-        banner.innerHTML = `<span style="margin-left: 50px;">${channelName}</span>`;
+        banner.innerHTML = `<span style="margin-left: 50px;">${channelNumber}. ${channelName}</span>`;
         banner.style.display = 'block';
 
         
@@ -140,6 +140,72 @@ document.addEventListener('DOMContentLoaded', function() {
             banner.style.display = 'none';
         }, 6000);
     }
+    
+    function handleChannelNumber(number) {
+        enteredChannelNumber += number;
+
+        console.log('Entered channel number:', enteredChannelNumber);
+
+        showChannelNumber();
+
+        clearTimeout(channelNumberTimeout);
+
+        channelNumberTimeout = setTimeout(function() {
+            selectEnteredChannel();
+        }, 1500);
+    }
+
+    function selectEnteredChannel() {
+        if (!enteredChannelNumber) {
+            return;
+        }
+
+        var channelNumber = parseInt(enteredChannelNumber, 10);
+        var currentChannels = mode === 'radio' ? radioChannels : channels;
+
+        enteredChannelNumber = '';
+
+        if (isNaN(channelNumber) || channelNumber < 1) {
+            return;
+        }
+
+        if (channelNumber > currentChannels.length) {
+            console.log(
+                'Channel does not exist:',
+                channelNumber,
+                'in mode:',
+                mode
+            );
+            return;
+        }
+
+        var index = channelNumber - 1;
+
+        if (mode === 'radio') {
+            currentRadioChannelIndex = index;
+        } else {
+            currentChannelIndex = index;
+        }
+
+        loadChannel(index);
+    }
+
+
+    function showChannelNumber() {
+        var banner = document.getElementById('channelBanner');
+
+        if (!banner) {
+            return;
+        }
+
+        banner.innerHTML =
+            '<span style="margin-left: 50px;">' +
+            enteredChannelNumber +
+            '</span>';
+
+        banner.style.display = 'block';
+    }
+
 
     function showDebugButton(event) {
         var debug = document.getElementById('debugButton');
@@ -185,6 +251,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Debug: display every remote button pressed
         showDebugButton(event);
 
+        // Numeric remote buttons
+         if (event.key >= '0' && event.key <= '9') { 
+            handleChannelNumber(event.key); 
+            return; 
+        }
+
         switch (event.key) {
             case 'ArrowUp':
                 changeChannel(1);
@@ -198,6 +270,11 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'ArrowRight':
                 switchToRadio();
                 break;
+            case 'Enter': 
+            case 'OK': 
+                clearTimeout(channelNumberTimeout); 
+                selectEnteredChannel(); 
+                break;
             case 'Back': // Back button on Samsung TV remotes
                 if (confirm('Are you sure you want to exit TVapp?')) {
                     tizen.application.getCurrentApplication().exit();
@@ -210,8 +287,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         changeChannel(1);
                         break;
                     case 428: // CH_DOWN button
-                    case 40: // Arrow Up
+                    case 40: // Arrow down
                         changeChannel(-1);
+                        break;
+                    case 41:
+                        clearTimeout(channelNumberTimeout); 
+                        selectEnteredChannel(); 
                         break;
                     case 37: // Arrow left
                         switchToTV();
