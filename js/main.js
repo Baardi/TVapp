@@ -94,10 +94,12 @@ document.addEventListener('DOMContentLoaded', function() {
             default:
                 switch (event.keyCode) {
                     case 427: // CH_UP button
+                    case 38: // Arrow Up
                         currentChannelIndex = (currentChannelIndex + 1) % channels.length;
                         loadChannel(currentChannelIndex);
                         break;
                     case 428: // CH_DOWN button
+                    case 40: // Arrow Up
                         currentChannelIndex = (currentChannelIndex - 1 + channels.length) % channels.length;
                         loadChannel(currentChannelIndex);
                         break;
