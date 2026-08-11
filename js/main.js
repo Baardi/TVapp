@@ -133,6 +133,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function switchToRadio() {
+        if (radioChannels.length === 0) {
+            return;
+        }
+
         mode = 'radio';
         loadChannel(currentRadioChannelIndex);
     }
