@@ -1,7 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOMContentLoaded event fired');
 
+    var hls = null;
+
+    var audioPlayer = document.getElementById('videoPlayer');
     var videoPlayer = document.getElementById('videoPlayer');
+
     var channels = [
         { name: 'NRK 1', url: 'https://nrk-live-no.akamaized.net/nrk1_dk7/muxed.m3u8' },
         { name: 'NRK 2', url: 'https://nrk-live-no.akamaized.net/nrk2/muxed.m3u8' },
@@ -17,44 +21,119 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'NRK P3', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p3_mp3_h' },
         { name: 'Radio Rock', url: 'http://live-bauerno.sharp-stream.com/radiorock_no_aac' },
         { name: 'Radio Vinyl', url: 'https://live-bauerno.sharp-stream.com/vinyl_no_mp3' },
-        { name: 'P6 Rock', url: 'https://p6.p4groupaudio.com/P06_AH' },
+        { name: 'P6 Rock', url: 'https://p6.p4groupaudio.com/P06_AH' }
     ];
     var currentRadioChannelIndex = 0;
     
     var mode = 'tv';
 
-    function loadChannel(index) {        
+    function loadChannel(index) {
         var currentChannels = getCurrentChannels();
+        var channel = currentChannels[index];
+
+        if (mode === 'radio') {
+            loadRadioChannel(channel);
+        } else {
+            loadTVChannel(channel);
+        }
+
+        showChannelBanner(channel.name);
+    }
+
+    function loadTVChannel(channel) {
+        console.log('Loading TV:', channel.name);
+
+        // Stop radio
+        audioPlayer.pause();
+        audioPlayer.removeAttribute('src');
+        audioPlayer.load();
+
+        // Stop previous HLS instance
+        if (hls) {
+            hls.destroy();
+            hls = null;
+        }
+
+        videoPlayer.style.display = 'block';
 
         if (Hls.isSupported()) {
             console.log('HLS.js is supported');
-            var hls = new Hls();
-            hls.loadSource(currentChannels[index].url);
+
+            hls = new Hls();
+
+            hls.loadSource(channel.url);
             hls.attachMedia(videoPlayer);
+
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
                 console.log('HLS manifest parsed');
-                videoPlayer.play();
+
+                videoPlayer.play().catch(function(error) {
+                    console.error('TV play error:', error);
+                });
             });
+
             hls.on(Hls.Events.ERROR, function(event, data) {
                 console.error('HLS.js error:', data);
             });
+
         } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+
             console.log('Native HLS support detected');
-            videoPlayer.src = currentChannels[index].url;
-            videoPlayer.addEventListener('loadedmetadata', function() {
-                console.log('Video metadata loaded');
-                videoPlayer.play();
-            });
-            videoPlayer.addEventListener('error', function(event) {
+
+            videoPlayer.src = channel.url;
+
+            videoPlayer.onloadedmetadata = function() {
+                videoPlayer.play().catch(function(error) {
+                    console.error('TV play error:', error);
+                });
+            };
+
+            videoPlayer.onerror = function(event) {
                 console.error('Video player error:', event);
-            });
+            };
+
         } else {
-            console.error('HLS is not supported in this browser.');
-            alert('HLS is not supported in this browser. Please use a compatible browser.');
+            console.error('HLS is not supported');
+            alert('HLS is not supported in this browser.');
+        }
+    }
+
+    function loadRadioChannel(channel) {
+        console.log('Loading radio:', channel.name);
+
+        // Stop TV
+        videoPlayer.pause();
+
+        if (hls) {
+            hls.destroy();
+            hls = null;
         }
 
-        // Display the channel banner
-        showChannelBanner(currentChannels[index].name);
+        videoPlayer.removeAttribute('src');
+        videoPlayer.load();
+
+        // Hide video
+        videoPlayer.style.display = 'none';
+
+        // Play radio using HTML5 audio
+        audioPlayer.style.display = 'none';
+
+        audioPlayer.pause();
+        audioPlayer.src = channel.url;
+        audioPlayer.load();
+
+        audioPlayer.oncanplay = function() {
+            console.log('Radio ready:', channel.name);
+
+            audioPlayer.play().catch(function(error) {
+                console.error('Radio play error:', error);
+            });
+        };
+
+        audioPlayer.onerror = function(event) {
+            console.error('Radio player error:', event);
+            console.error('Audio error code:', audioPlayer.error);
+        };
     }
 
     function getCurrentChannels() {
@@ -99,6 +178,13 @@ document.addEventListener('DOMContentLoaded', function() {
         loadChannel(index);
     }
 
+    function switchMode() {
+        if (mode == 'radio') {
+            switchToTV();
+        } else {
+            switchToRadio();
+        }
+    }
 
     function switchToTV() {
         mode = 'tv';
@@ -184,45 +270,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Debug: display every remote button pressed
         showDebugButton(event);
-
-        switch (event.key) {
-            case 'ArrowUp':
+        
+        switch (event.keyCode) {
+            case 38: // Arrow Up
                 changeChannel(1);
                 break;
-            case 'ArrowDown':
+            case 40: // Arrow Up
                 changeChannel(-1);
-                break;            
-            case 'ArrowLeft':
-                switchToTV();
                 break;
-            case 'ArrowRight':
-                switchToRadio();
+            case 37: // Arrow left
+            case 39: // Arrow right
+                switchMode();
                 break;
-            case 'Back': // Back button on Samsung TV remotes
-                if (confirm('Are you sure you want to exit TVapp?')) {
+            case 10009: // Back button
+                if (confirm('Are you sure you want to exit the TVapp?')) {
                     tizen.application.getCurrentApplication().exit();
-                }
-                break;
-            default:
-                switch (event.keyCode) {
-                    case 427: // CH_UP button
-                    case 38: // Arrow Up
-                        changeChannel(1);
-                        break;
-                    case 428: // CH_DOWN button
-                    case 40: // Arrow Up
-                        changeChannel(-1);
-                        break;
-                    case 37: // Arrow left
-                        switchToTV();
-                        break;
-                    case 456: // Arrow right
-                        switchToRadio();
-                        break;
-                    case 10009: // CH_DOWN button
-                    	if (confirm('Are you sure you want to exit the TVapp?')) {
-                            tizen.application.getCurrentApplication().exit();
-                        }
                 }
         }
     });
