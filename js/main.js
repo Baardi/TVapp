@@ -27,8 +27,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     var mode = 'tv';
 
+    var enteredChannelNumber = '';
+    var channelNumberTimeout = null;
+
     function loadChannel(index) {
         var currentChannels = getCurrentChannels();
+        
+        if (!Number.isInteger(index) ||
+            index < 0 ||
+            index >= currentChannels.length) {
+            console.log('Channel index out of range:', index);
+            return;
+        }
+
         var channel = currentChannels[index];
 
         if (mode === 'radio') {
@@ -37,7 +48,8 @@ document.addEventListener('DOMContentLoaded', function() {
             loadTVChannel(channel);
         }
 
-        showChannelBanner(channel.name);
+        // Display the channel banner
+        showChannelBanner(index + 1, channels[index].name);
     }
 
     function loadTVChannel(channel) {
@@ -196,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loadChannel(currentRadioChannelIndex);
     }
 
-    function showChannelBanner(channelName) {
+    function showChannelBanner(channelNumber, channelName) {
         var banner = document.getElementById('channelBanner');
         if (!banner) {
             banner = document.createElement('div');
@@ -218,13 +230,60 @@ document.addEventListener('DOMContentLoaded', function() {
             banner.style.paddingBottom = '10px';
             document.body.appendChild(banner);
         }
-        banner.innerHTML = `<span style="margin-left: 50px;">${channelName}</span>`;
+        banner.innerHTML = `<span style="margin-left: 50px;">${channelNumber}. ${channelName}</span>`;
         banner.style.display = 'block';
 
         
         setTimeout(function() {
             banner.style.display = 'none';
         }, 6000);
+    }
+
+    function handleChannelNumber(number) {
+        enteredChannelNumber += number;
+
+        console.log('Entered channel number:', enteredChannelNumber);
+
+        showChannelNumber();
+
+        clearTimeout(channelNumberTimeout);
+
+        channelNumberTimeout = setTimeout(function() {
+            selectEnteredChannel();
+        }, 6000);
+    }
+
+    function selectEnteredChannel() {
+        if (!enteredChannelNumber) {
+            return;
+        }
+
+        var channelNumber = Number(enteredChannelNumber);
+        var currentChannels = getCurrentChannels();
+
+        enteredChannelNumber = '';
+
+        if (!Number.isInteger(channelNumber) ||
+            channelNumber < 1 ||
+            channelNumber > currentChannels.length) {
+            console.log('Channel does not exist:', channelNumber);
+            return;
+        }
+
+        loadChannel(channelNumber - 1);
+    }
+
+    function showChannelNumber() {
+        var banner = document.getElementById('channelBanner');
+
+        if (!banner) {
+            return;
+        }
+
+        banner.innerHTML =
+            `<span style="margin-left: 50px;">${enteredChannelNumber}</span>`;
+
+        banner.style.display = 'block';
     }
 
     function showDebugButton(event) {
@@ -271,6 +330,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Debug: display every remote button pressed
         showDebugButton(event);
         
+        // Numeric remote buttons
+        if (event.key >= '0' && event.key <= '9') {
+            handleChannelNumber(event.key);
+            return;
+        }
+
         switch (event.keyCode) {
             case 38: // Arrow Up
                 changeChannel(1);
@@ -281,6 +346,10 @@ document.addEventListener('DOMContentLoaded', function() {
             case 37: // Arrow left
             case 39: // Arrow right
                 switchMode();
+                break;
+            case 13: // Enter
+                clearTimeout(channelNumberTimeout);
+                selectEnteredChannel();
                 break;
             case 10009: // Back button
                 if (confirm('Are you sure you want to exit the TVapp?')) {
