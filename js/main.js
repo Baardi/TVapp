@@ -7,17 +7,29 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'NRK 2', url: 'https://nrk-live-no.akamaized.net/nrk2/muxed.m3u8' },
         { name: 'NRK 3', url: 'https://nrk-live-no.akamaized.net/nrk3/muxed.m3u8' },
         { name: 'NRK Super', url: 'https://nrk-live-no.akamaized.net/nrksuper/muxed.m3u8' },
-        { name: 'NRK Teiknspråk', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' }        
-        
-
+        { name: 'NRK Teiknspråk', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' }
     ];
     var currentChannelIndex = 0;
 
-    function loadChannel(index) {
+    var radioChannels = [
+        { name: 'NRK P1', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p1_dk9_aac_h' },
+        { name: 'NRK P2', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p2_aac_h' },
+        { name: 'NRK P3', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p3_mp3_h' },
+        { name: 'Radio Rock', url: 'http://live-bauerno.sharp-stream.com/radiorock_no_aac' },
+        { name: 'Radio Vinyl', url: 'https://live-bauerno.sharp-stream.com/vinyl_no_mp3' },
+        { name: 'P6 Rock', url: 'https://p6.p4groupaudio.com/P06_AH' },
+    ];
+    var currentRadioChannelIndex = 0;
+    
+    var mode = 'tv';
+
+    function loadChannel(index) {        
+        var currentChannels = getCurrentChannels();
+
         if (Hls.isSupported()) {
             console.log('HLS.js is supported');
             var hls = new Hls();
-            hls.loadSource(channels[index].url);
+            hls.loadSource(currentChannels[index].url);
             hls.attachMedia(videoPlayer);
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
                 console.log('HLS manifest parsed');
@@ -28,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
             console.log('Native HLS support detected');
-            videoPlayer.src = channels[index].url;
+            videoPlayer.src = currentChannels[index].url;
             videoPlayer.addEventListener('loadedmetadata', function() {
                 console.log('Video metadata loaded');
                 videoPlayer.play();
@@ -42,7 +54,60 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Display the channel banner
-        showChannelBanner(channels[index].name);
+        showChannelBanner(currentChannels[index].name);
+    }
+
+    function getCurrentChannels() {
+        return mode === 'radio' ? radioChannels : channels;
+    }
+
+    function getCurrentChannelIndex() {
+        return mode === 'radio'
+            ? currentRadioChannelIndex
+            : currentChannelIndex;
+    }
+
+    function setCurrentChannelIndex(index) {
+        if (mode === 'radio') {
+            currentRadioChannelIndex = index;
+        } else {
+            currentChannelIndex = index;
+        }
+    }
+
+    function changeChannel(direction) {
+        var currentChannels = getCurrentChannels();
+
+        if (currentChannels.length === 0) {
+            return;
+        }
+
+        var index = getCurrentChannelIndex();
+
+        index += direction;
+
+        if (index >= currentChannels.length) {
+            index = 0;
+        }
+
+        if (index < 0) {
+            index = currentChannels.length - 1;
+        }
+
+        setCurrentChannelIndex(index);
+
+        loadChannel(index);
+    }
+
+
+    function switchToTV() {
+        mode = 'tv';
+        loadChannel(currentChannelIndex);
+    }
+
+    function switchToRadio() {
+        mode = 'radio';
+        loadChannel(currentRadioChannelIndex);
     }
 
     function showChannelBanner(channelName) {
@@ -122,12 +187,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         switch (event.key) {
             case 'ArrowUp':
-                currentChannelIndex = (currentChannelIndex + 1) % channels.length;
-                loadChannel(currentChannelIndex);
+                changeChannel(1);
                 break;
             case 'ArrowDown':
-                currentChannelIndex = (currentChannelIndex - 1 + channels.length) % channels.length;
-                loadChannel(currentChannelIndex);
+                changeChannel(-1);
+                break;            
+            case 'ArrowLeft':
+                switchToTV();
+                break;
+            case 'ArrowRight':
+                switchToRadio();
                 break;
             case 'Back': // Back button on Samsung TV remotes
                 if (confirm('Are you sure you want to exit TVapp?')) {
@@ -138,13 +207,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 switch (event.keyCode) {
                     case 427: // CH_UP button
                     case 38: // Arrow Up
-                        currentChannelIndex = (currentChannelIndex + 1) % channels.length;
-                        loadChannel(currentChannelIndex);
+                        changeChannel(1);
                         break;
                     case 428: // CH_DOWN button
                     case 40: // Arrow Up
-                        currentChannelIndex = (currentChannelIndex - 1 + channels.length) % channels.length;
-                        loadChannel(currentChannelIndex);
+                        changeChannel(-1);
+                        break;
+                    case 37: // Arrow left
+                        switchToTV();
+                        break;
+                    case 456: // Arrow right
+                        switchToRadio();
                         break;
                     case 10009: // CH_DOWN button
                     	if (confirm('Are you sure you want to exit the TVapp?')) {
