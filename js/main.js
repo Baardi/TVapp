@@ -76,9 +76,50 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 6000);
     }
 
+    function showDebugButton(event) {
+        var debug = document.getElementById('debugButton');
+
+        if (!debug) {
+            debug = document.createElement('div');
+            debug.id = 'debugButton';
+
+            debug.style.position = 'fixed';
+            debug.style.top = '30px';
+            debug.style.left = '30px';
+            debug.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+            debug.style.color = '#00ff00';
+            debug.style.padding = '15px 25px';
+            debug.style.fontSize = '28px';
+            debug.style.fontFamily = 'monospace';
+            debug.style.zIndex = '99999';
+            debug.style.border = '2px solid #00ff00';
+            debug.style.borderRadius = '5px';
+
+            document.body.appendChild(debug);
+        }
+
+        var keyName = event.key || 'Unknown';
+
+        debug.innerHTML =
+            'BUTTON: ' + keyName +
+            '<br>keyCode: ' + event.keyCode;
+
+        debug.style.display = 'block';
+
+        clearTimeout(window.debugButtonTimeout);
+
+        window.debugButtonTimeout = setTimeout(function() {
+            debug.style.display = 'none';
+        }, 2000);
+    }
+
     loadChannel(currentChannelIndex);
 
     document.addEventListener('keydown', function(event) {
+
+        // Debug: display every remote button pressed
+        showDebugButton(event);
+
         switch (event.key) {
             case 'ArrowUp':
                 currentChannelIndex = (currentChannelIndex + 1) % channels.length;
