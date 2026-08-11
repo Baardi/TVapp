@@ -1,7 +1,16 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOMContentLoaded event fired');
-
+    
     var videoPlayer = document.getElementById('videoPlayer');
+    
+    var hls = null;
+    var mode = 'tv';
+    
+    var debugButtonTimeout = null;
+    var channelNumberTimeout = null;
+    var channelBannerTimeout = null;
+
+    var currentChannelIndex = 0;
     var channels = [
         { name: 'NRK 1', url: 'https://nrk-live-no.akamaized.net/nrk1_dk7/muxed.m3u8' },
         { name: 'NRK 2', url: 'https://nrk-live-no.akamaized.net/nrk2/muxed.m3u8' },
@@ -9,8 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'NRK Super', url: 'https://nrk-live-no.akamaized.net/nrksuper/muxed.m3u8' },
         { name: 'NRK Teiknspråk', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' }
     ];
-    var currentChannelIndex = 0;
-
+    
+    var currentRadioChannelIndex = 0;
     var radioChannels = [
         { name: 'NRK P1', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p1_dk9_aac_h' },
         { name: 'NRK P2', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p2_aac_h' },
@@ -18,17 +27,35 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'Radio Rock', url: 'http://live-bauerno.sharp-stream.com/radiorock_no_aac' },
         { name: 'Radio Vinyl', url: 'https://live-bauerno.sharp-stream.com/vinyl_no_mp3' },
         { name: 'P6 Rock', url: 'https://p6.p4groupaudio.com/P06_AH' },
-    ];
-    var currentRadioChannelIndex = 0;
-    
-    var mode = 'tv';
+    ];    
 
     function loadChannel(index) {        
         var currentChannels = getCurrentChannels();
 
+        if (index < 0 || index >= currentChannels.length) {
+            console.error(
+                'Invalid channel index:',
+                index,
+                'mode:',
+                mode,
+                'channel count:',
+                currentChannels.length
+            );
+            return;
+        }
+
+        if (hls) {
+            hls.destroy();
+            hls = null;
+        }
+
+        videoPlayer.pause();
+        videoPlayer.removeAttribute('src');
+        videoPlayer.load();
+
         if (Hls.isSupported()) {
             console.log('HLS.js is supported');
-            var hls = new Hls();
+            hls = new Hls();
             hls.loadSource(currentChannels[index].url);
             hls.attachMedia(videoPlayer);
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
@@ -41,11 +68,11 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
             console.log('Native HLS support detected');
             videoPlayer.src = currentChannels[index].url;
-            videoPlayer.addEventListener('loadedmetadata', function() {
+            videoPlayer.onloadedmetadata = function() {
                 console.log('Video metadata loaded');
                 videoPlayer.play();
             });
-            videoPlayer.addEventListener('error', function(event) {
+            videoPlayer.onerror = function(event) {
                 console.error('Video player error:', event);
             });
         } else {
@@ -135,8 +162,9 @@ document.addEventListener('DOMContentLoaded', function() {
         banner.innerHTML = `<span style="margin-left: 50px;">${channelNumber}. ${channelName}</span>`;
         banner.style.display = 'block';
 
-        
-        setTimeout(function() {
+        clearTimeout(channelBannerTimeout);
+
+        channelBannerTimeout = setTimeout(function() {
             banner.style.display = 'none';
         }, 6000);
     }
@@ -237,9 +265,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         debug.style.display = 'block';
 
-        clearTimeout(window.debugButtonTimeout);
+        clearTimeout(debugButtonTimeout);
 
-        window.debugButtonTimeout = setTimeout(function() {
+        debugButtonTimeout = setTimeout(function() {
             debug.style.display = 'none';
         }, 2000);
     }
