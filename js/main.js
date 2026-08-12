@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
             banner.style.paddingBottom = '10px';
             document.body.appendChild(banner);
         }
-        banner.innerHTML = `<span style="margin-left: 50px;">${channelName}. ${channelName}</span>`;
+        banner.innerHTML = `<span style="margin-left: 50px;">${channelIndex}. ${channelName}</span>`;
         banner.style.display = 'block';
 
         
