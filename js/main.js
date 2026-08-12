@@ -203,6 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showCurrentChannel() {
+        var currentChannels = getCurrentChannels();
         var index = getCurrentChannelIndex();
         var channel = currentChannels[index];
         showChannelBanner(index + 1, channel.name);
