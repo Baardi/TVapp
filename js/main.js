@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
             loadTVChannel(channel);
         }
 
-        showChannelBanner(channel.name);
+        showChannelBanner(index + 1, channel.name);
     }
 
     function loadTVChannel(channel) {
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loadChannel(currentRadioChannelIndex);
     }
 
-    function showChannelBanner(channelName) {
+    function showChannelBanner(channelIndex, channelName) {
         var banner = document.getElementById('channelBanner');
         if (!banner) {
             banner = document.createElement('div');
@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
             banner.style.paddingBottom = '10px';
             document.body.appendChild(banner);
         }
-        banner.innerHTML = `<span style="margin-left: 50px;">${channelName}</span>`;
+        banner.innerHTML = `<span style="margin-left: 50px;">${channelName}. ${channelName}</span>`;
         banner.style.display = 'block';
 
         
