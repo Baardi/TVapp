@@ -14,7 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'NRK 2', url: 'https://nrk-live-no.akamaized.net/nrk2/muxed.m3u8' },
         { name: 'NRK 3', url: 'https://nrk-live-no.akamaized.net/nrk3/muxed.m3u8' },
         { name: 'NRK Super', url: 'https://nrk-live-no.akamaized.net/nrksuper/muxed.m3u8' },
-        { name: 'NRK Teiknspråk', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' }
+        { name: 'NRK Teiknspråk', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' },
+        { name: 'Frikanalen', url: 'https://frikanalen.no/stream/index.m3u8' }
     ];
     var currentTvChannelIndex = 0;
 
