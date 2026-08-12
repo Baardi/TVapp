@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     var mode = 'tv';
 
+    var bannerTimeout = 3000;
+
     function loadChannel(index) {
         var currentChannels = getCurrentChannels();
         var channel = currentChannels[index];
@@ -230,11 +232,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         banner.innerHTML = `<span style="margin-left: 50px;">${channelIndex}. ${channelName}</span>`;
         banner.style.display = 'block';
-
         
-        setTimeout(function() {
+        clearTimeout(bannerTimeout);
+
+        banner.style.display = 'block';
+
+        bannerTimeout = setTimeout(function() {
             banner.style.display = 'none';
-        }, 6000);
+        }, 3000);
     }
 
     loadChannel(currentTvChannelIndex);
