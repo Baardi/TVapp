@@ -6,14 +6,17 @@ document.addEventListener('DOMContentLoaded', function() {
     var audioPlayer = document.getElementById('videoPlayer');
     var videoPlayer = document.getElementById('videoPlayer');
 
-    var channels = [
+    // Dummy list, to satisfy apps2samsung
+    var channels = [];
+
+    var tvChannels = [
         { name: 'NRK 1', url: 'https://nrk-live-no.akamaized.net/nrk1_dk7/muxed.m3u8' },
         { name: 'NRK 2', url: 'https://nrk-live-no.akamaized.net/nrk2/muxed.m3u8' },
         { name: 'NRK 3', url: 'https://nrk-live-no.akamaized.net/nrk3/muxed.m3u8' },
         { name: 'NRK Super', url: 'https://nrk-live-no.akamaized.net/nrksuper/muxed.m3u8' },
         { name: 'NRK Teiknspråk', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' }
     ];
-    var currentChannelIndex = 0;
+    var currentTvChannelIndex = 0;
 
     var radioChannels = [
         { name: 'NRK P1', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p1_dk9_aac_h' },
@@ -137,20 +140,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function getCurrentChannels() {
-        return mode === 'radio' ? radioChannels : channels;
+        return mode === 'radio' ? radioChannels : tvChannels;
     }
 
     function getCurrentChannelIndex() {
         return mode === 'radio'
             ? currentRadioChannelIndex
-            : currentChannelIndex;
+            : currentTvChannelIndex;
     }
 
     function setCurrentChannelIndex(index) {
         if (mode === 'radio') {
             currentRadioChannelIndex = index;
         } else {
-            currentChannelIndex = index;
+            currentTvChannelIndex = index;
         }
     }
 
@@ -188,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function switchToTV() {
         mode = 'tv';
-        loadChannel(currentChannelIndex);
+        loadChannel(currentTvChannelIndex);
     }
 
     function switchToRadio() {
@@ -227,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 6000);
     }
 
-    loadChannel(currentChannelIndex);
+    loadChannel(currentTvChannelIndex);
 
     document.addEventListener('keydown', function(event) {
         
