@@ -24,27 +24,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var radioChannels = [
         // Nrk
-        { name: 'NRK P1', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p1_dk9_aac_h' },
-        { name: 'NRK P2', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p2_aac_h' },
-        { name: 'NRK P3', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p3_mp3_h' },
+        { name: 'NRK P1', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/p1_dk9' },
+        { name: 'NRK P2', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/p2' },
+        { name: 'NRK P3', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/p3' },
         { name: 'NRK Super', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/radio_super' },
         { name: 'NRK P1+', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/p1pluss' },        
-        { name: 'NRK P3 Musikk', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p3musikk_aac_h' },
+        { name: 'NRK P3 Musikk', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/p3musikk' },
         { name: 'NRK mP3', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/mp3' },
         { name: 'NRK Nyheiter', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/nyheter' },
         { name: 'NRK Klassisk', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/klassisk' },
         { name: 'NRK Jazz', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/jazz' },
         { name: 'NRK Folkemusikk', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/folkemusikk' },
         { name: 'NRK Sport', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/sport' },
+        { name: 'NRK Sápmi', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/sami' },
         
         // Bauer Media
         { name: 'Radio Norge', url: 'https://live-bauerno.sharp-stream.com/radionorge_no_aac' },
         { name: 'Radio Rock', url: 'http://live-bauerno.sharp-stream.com/radiorock_no_aac' },
         { name: 'Radio Vinyl', url: 'https://live-bauerno.sharp-stream.com/vinyl_no_aac' },
-
-        // Viaplay Group
+        { name: 'Radio Topp 40', url: 'http://live-bauerno.sharp-stream.com/top40_no_aac' },
+        { name: 'P24-7 Mix', url: 'http://live-bauerno.sharp-stream.com/p247mix_no_aac' },
+        { name: 'P24-7 Kos', url: 'http://live-bauerno.sharp-stream.com/p247kos_no_aac' },
+        { name: 'P24-7 Fun', url: 'http://live-bauerno.sharp-stream.com/p247fun_no_aac' },
+        { name: 'P24-7 Hot', url: 'http://live-bauerno.sharp-stream.com/p247hot_no_aac' },
+        { name: 'NRJ', url: 'http://live-bauerno.sharp-stream.com/kiss_no_aac' },
+        
+        // Viaplay Group        
         { name: 'P4 Norge', url: 'https://p4.p4groupaudio.com/P04_AH' },
-        { name: 'P6 Rock', url: 'https://p6.p4groupaudio.com/P06_AH' }
+        { name: 'P5 Hits', url: 'https://p5.p4groupaudio.com/P05_AH' },
+        { name: 'P6 Rock', url: 'https://p6.p4groupaudio.com/P06_AH' },
+        { name: 'P7 Klem', url: 'https://p7.p4groupaudio.com/P07_AH' },
+        { name: 'P8 Pop', url: 'https://p8.p4groupaudio.com/P08_AH' },
+        { name: 'P9 Retro', url: 'https://p9.p4groupaudio.com/P09_AH' },
+        { name: 'P10 Country', url: 'https://p10.p4groupaudio.com/P10_AH' },
+        { name: 'P11 Dance', url: 'https://p11.p4groupaudio.com/P11_AH' },
+        { name: 'P12 Hitmix', url: 'https://p12.p4groupaudio.com/P12_AH' },
+        { name: 'P5 Nonstop Hits', url: 'https://p5n.p4groupaudio.com/P05AAH' },
+
+        // 1FM
+        { name: '1FM', url: 'https://lyd.1fm.no/1fm_hq' },
+        { name: '1FM Gull', url: 'https://lyd.1fm.no/1fmgull_hq' },
+        { name: '1FM Rock', url: 'https://lyd.1fm.no/1fmrock_hq' },
+        { name: '1FM Jazz', url: 'https://lyd.1fm.no/1fmjazz_hq' }
     ];
     var currentRadioChannelIndex = 0;
     
