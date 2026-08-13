@@ -25,11 +25,17 @@ document.addEventListener('DOMContentLoaded', function() {
     var radioChannels = [
         // Nrk
         { name: 'NRK P1', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p1_dk9_aac_h' },
-        { name: 'NRK P1+', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/p1pluss' },        
         { name: 'NRK P2', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p2_aac_h' },
         { name: 'NRK P3', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p3_mp3_h' },
+        { name: 'NRK Super', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/radio_super' },
+        { name: 'NRK P1+', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/p1pluss' },        
         { name: 'NRK P3 Musikk', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p3musikk_aac_h' },
         { name: 'NRK mP3', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/mp3' },
+        { name: 'NRK Nyheiter', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/nyheter' },
+        { name: 'NRK Klassisk', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/klassisk' },
+        { name: 'NRK Jazz', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/jazz' },
+        { name: 'NRK Folkemusikk', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/folkemusikk' },
+        { name: 'NRK Sport', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/sport' },
         
         // Bauer
         { name: 'Radio Rock', url: 'http://live-bauerno.sharp-stream.com/radiorock_no_aac' },
