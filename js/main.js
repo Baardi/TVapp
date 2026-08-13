@@ -10,19 +10,28 @@ document.addEventListener('DOMContentLoaded', function() {
     var channels = [];
 
     var tvChannels = [
+        // Nrk
         { name: 'NRK 1', url: 'https://nrk-live-no.akamaized.net/nrk1_dk7/muxed.m3u8' },
         { name: 'NRK 2', url: 'https://nrk-live-no.akamaized.net/nrk2/muxed.m3u8' },
         { name: 'NRK 3', url: 'https://nrk-live-no.akamaized.net/nrk3/muxed.m3u8' },
         { name: 'NRK Super', url: 'https://nrk-live-no.akamaized.net/nrksuper/muxed.m3u8' },
         { name: 'NRK Teiknspråk', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' },
+        
+        // Frikanalen
         { name: 'Frikanalen', url: 'https://frikanalen.no/stream/index.m3u8' }
     ];
     var currentTvChannelIndex = 0;
 
     var radioChannels = [
+        // Nrk
         { name: 'NRK P1', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p1_dk9_aac_h' },
+        { name: 'NRK P1+', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/p1pluss' },        
         { name: 'NRK P2', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p2_aac_h' },
         { name: 'NRK P3', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p3_mp3_h' },
+        { name: 'NRK P3 Musikk', url: 'https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p3musikk_aac_h' },
+        { name: 'NRK mP3', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/mp3' },
+        
+        // Bauer
         { name: 'Radio Rock', url: 'http://live-bauerno.sharp-stream.com/radiorock_no_aac' },
         { name: 'Radio Vinyl', url: 'https://live-bauerno.sharp-stream.com/vinyl_no_mp3' },
         { name: 'P6 Rock', url: 'https://p6.p4groupaudio.com/P06_AH' }
