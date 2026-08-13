@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var hls = null;
 
-    var audioPlayer = document.getElementById('videoPlayer');
+    var audioPlayer = document.getElementById('audioPlayer');
     var videoPlayer = document.getElementById('videoPlayer');
 
     // Dummy list, to satisfy apps2samsung
