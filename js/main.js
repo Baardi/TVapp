@@ -269,6 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 13: // Enter
                 showCurrentChannel();
+                break;
             case 10009: // Back button
                 if (confirm('Are you sure you want to exit the TVapp?')) {
                     tizen.application.getCurrentApplication().exit();
