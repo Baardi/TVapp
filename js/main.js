@@ -221,11 +221,26 @@ document.addEventListener('DOMContentLoaded', function() {
         loadChannel(currentRadioChannelIndex);
     }
 
-    function showCurrentChannel() {
-        var currentChannels = getCurrentChannels();
-        var index = getCurrentChannelIndex();
-        var channel = currentChannels[index];
-        showChannelBanner(index + 1, channel.name);
+    function toggleChannelBanner() {
+        var banner = document.getElementById('channelBanner');
+        if (!banner || banner.style.display === 'none') {
+            var currentChannels = getCurrentChannels();
+            var index = getCurrentChannelIndex();
+            var channel = currentChannels[index];
+
+            showChannelBanner(index + 1, channel.name);
+        }
+        else {
+            hideChannelBanner();
+        }
+    }
+
+    function hideChannelBanner() {
+        var banner = document.getElementById('channelBanner');
+        if (banner) {
+            banner.style.display = 'none';
+            clearTimeout(bannerTimeout);
+        }
     }
 
     function showChannelBanner(channelIndex, channelName) {
@@ -278,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 switchMode();
                 break;
             case 13: // Enter
-                showCurrentChannel();
+                toggleChannelBanner();
                 break;
             case 10009: // Back button
                 if (confirm('Are you sure you want to exit the TVapp?')) {
