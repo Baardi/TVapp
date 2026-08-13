@@ -37,9 +37,13 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'NRK Folkemusikk', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/folkemusikk' },
         { name: 'NRK Sport', url: 'https://lyd.nrk.no/icecast/aac/high/s0w7hwn47m/sport' },
         
-        // Bauer
+        // Bauer Media
+        { name: 'Radio Norge', url: 'https://live-bauerno.sharp-stream.com/radionorge_no_aac' },
         { name: 'Radio Rock', url: 'http://live-bauerno.sharp-stream.com/radiorock_no_aac' },
-        { name: 'Radio Vinyl', url: 'https://live-bauerno.sharp-stream.com/vinyl_no_mp3' },
+        { name: 'Radio Vinyl', url: 'https://live-bauerno.sharp-stream.com/vinyl_no_aac' },
+
+        // Viaplay Group
+        { name: 'P4 Norge', url: 'https://p4.p4groupaudio.com/P04_AH' },
         { name: 'P6 Rock', url: 'https://p6.p4groupaudio.com/P06_AH' }
     ];
     var currentRadioChannelIndex = 0;
