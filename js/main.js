@@ -24,7 +24,10 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'NRK Nett-TV 4', url: 'https://nrk-live-no.akamaized.net/nrktv7/muxed.m3u8' },        
         
         // Frikanalen
-        { name: 'Frikanalen', url: 'https://frikanalen.no/stream/index.m3u8' }
+        { name: 'Frikanalen', url: 'https://frikanalen.no/stream/index.m3u8' },
+        
+        // Red Bull TV
+        { name: 'Red Bull TV', url: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8' }
     ];
     var currentTvChannelIndex = 0;
 
