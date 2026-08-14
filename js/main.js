@@ -17,6 +17,12 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'NRK Super', url: 'https://nrk-live-no.akamaized.net/nrksuper/muxed.m3u8' },
         { name: 'NRK Teiknspråk', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' },
         
+        // Nrk Nett-TV
+        { name: 'NRK Nett-TV 1', url: 'https://nrk-live-no.akamaized.net/nrktv4/muxed.m3u8' },
+        { name: 'NRK Nett-TV 2', url: 'https://nrk-live-no.akamaized.net/nrktv5/muxed.m3u8' },
+        { name: 'NRK Nett-TV 3', url: 'https://nrk-live-no.akamaized.net/nrktv6/muxed.m3u8' },
+        { name: 'NRK Nett-TV 4', url: 'https://nrk-live-no.akamaized.net/nrktv7/muxed.m3u8' },        
+        
         // Frikanalen
         { name: 'Frikanalen', url: 'https://frikanalen.no/stream/index.m3u8' }
     ];
