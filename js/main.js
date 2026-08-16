@@ -318,7 +318,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         return date.toLocaleTimeString([], {
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            hour12: false
         });
     }
 
@@ -426,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (nextProgram) {
             html +=
                 '<div style="font-size:18px;color:#999;margin-top:8px;">' +
-                'Next: ' +
+                'Neste: ' +
                 escapeHtml(nextProgram.title) +
                 '</div>';
         }
