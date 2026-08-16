@@ -3,6 +3,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var hls = null;
 
+    var EPG_URL = 'https://www.open-epg.com/files/norway.xml';
+
+    var epgLoading = false;
+    var epgError = null;
+
     var audioPlayer = document.getElementById('audioPlayer');
     var videoPlayer = document.getElementById('videoPlayer');
 
@@ -11,12 +16,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var tvChannels = [
         // Nrk
-        { name: 'NRK 1', url: 'https://nrk-live-no.akamaized.net/nrk1_dk7/muxed.m3u8' },
-        { name: 'NRK 2', url: 'https://nrk-live-no.akamaized.net/nrk2/muxed.m3u8' },
-        { name: 'NRK 3', url: 'https://nrk-live-no.akamaized.net/nrk3/muxed.m3u8' },
-        { name: 'NRK Super', url: 'https://nrk-live-no.akamaized.net/nrksuper/muxed.m3u8' },
-        { name: 'NRK Teiknspråk', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' },
-        
+        { name: 'NRK 1', epgId: 'NRK1Rogaland.no', url: 'https://nrk-live-no.akamaized.net/nrk1_dk7/muxed.m3u8' },
+        { name: 'NRK 2', epgId: 'NRK2.no', url: 'https://nrk-live-no.akamaized.net/nrk2/muxed.m3u8' },
+        { name: 'NRK 3', epgId: 'NRK3.no', url: 'https://nrk-live-no.akamaized.net/nrk3/muxed.m3u8'},
+        { name: 'NRK Super', epgId: 'NRKSuper.no', url: 'https://nrk-live-no.akamaized.net/nrksuper/muxed.m3u8' },
+        { name: 'NRK Teiknspråk', epgId: 'NRK1Tegnspraak.no', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' },
+            
         // Nrk Nett-TV
         { name: 'NRK Nett-TV 1', url: 'https://nrk-live-no.akamaized.net/nrktv4/muxed.m3u8' },
         { name: 'NRK Nett-TV 2', url: 'https://nrk-live-no.akamaized.net/nrktv5/muxed.m3u8' },
@@ -24,10 +29,11 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'NRK Nett-TV 4', url: 'https://nrk-live-no.akamaized.net/nrktv7/muxed.m3u8' },        
         
         // Frikanalen
-        { name: 'Frikanalen', url: 'https://frikanalen.no/stream/index.m3u8' },
+        { name: 'Frikanalen', epgId: 'Frikanalen.no', url: 'https://frikanalen.no/stream/index.m3u8' },
         
         // Red Bull TV
-        { name: 'Red Bull TV', url: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8' }
+        { name: 'Red Bull TV', epgId: '10001', url: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8' }
+                
     ];
     var currentTvChannelIndex = 0;
 
@@ -82,6 +88,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var bannerTimeout = 3000;
 
+    function loadEPG() {
+        if (epgLoading) {
+            return;
+        }
+
+        epgLoading = true;
+        epgError = null;
+
+        console.log('Loading EPG...');
+
+        EPG.load(EPG_URL)
+            .then(function () {
+                console.log(
+                    'EPG loaded:',
+                    EPG.updatedAt()
+                );
+
+                epgLoading = false;
+
+                updateChannelBanner();
+            })
+            .catch(function (error) {
+                epgLoading = false;
+                epgError = error;
+
+                console.error(
+                    'Failed to load EPG:',
+                    error
+                );
+            });
+    }
+
     function loadChannel(index) {
         var currentChannels = getCurrentChannels();
         var channel = currentChannels[index];
@@ -92,7 +130,12 @@ document.addEventListener('DOMContentLoaded', function() {
             loadTVChannel(channel);
         }
 
-        showChannelBanner(index + 1, channel.name);
+        showChannelBanner(
+            index + 1,
+            channel.name,
+            EPG.getCurrent(channel.epgId),
+            EPG.getNext(channel.epgId, 1)[0]
+        );
     }
 
     function loadTVChannel(channel) {
@@ -257,12 +300,49 @@ document.addEventListener('DOMContentLoaded', function() {
             var currentChannels = getCurrentChannels();
             var index = getCurrentChannelIndex();
             var channel = currentChannels[index];
-
-            showChannelBanner(index + 1, channel.name);
+            
+            showChannelBanner(
+                index + 1,
+                channel.name,
+                EPG.getCurrent(channel.epgId),
+                EPG.getNext(channel.epgId, 1)[0]
+            );
         }
         else {
             hideChannelBanner();
         }
+    }
+
+    function formatTime(date) {
+        if (!date) return '';
+
+        return date.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function getProgramProgress(program) {
+        var now = Date.now();
+
+        var start = program.start.getTime();
+        var stop = program.stop.getTime();
+
+        if (now <= start) return 0;
+        if (now >= stop) return 100;
+
+        return Math.round(
+            ((now - start) / (stop - start)) * 100
+        );
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 
     function hideChannelBanner() {
@@ -273,41 +353,131 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function showChannelBanner(channelIndex, channelName) {
+    function showChannelBanner(
+        channelIndex,
+        channelName,
+        currentProgram,
+        nextProgram
+    ) {
         var banner = document.getElementById('channelBanner');
+
         if (!banner) {
             banner = document.createElement('div');
             banner.id = 'channelBanner';
+
             banner.style.position = 'absolute';
             banner.style.bottom = '0';
             banner.style.left = '0';
             banner.style.width = '100%';
-            banner.style.height = '15%';
-            banner.style.backgroundColor = 'rgba(0, 0, 0, 1)';
+            banner.style.minHeight = '18%';
+            banner.style.backgroundColor = 'rgba(0, 0, 0, 0.92)';
             banner.style.color = 'white';
-            banner.style.fontSize = '30px'; // Increase font size
-            banner.style.fontFamily = 'Helvetiva Neue, sans-serif';
-            banner.style.padding = '10px';
+            banner.style.fontFamily = 'Arial, sans-serif';
+            banner.style.padding = '25px 50px';
             banner.style.boxSizing = 'border-box';
             banner.style.zIndex = '1000';
-            banner.style.display = 'flex';
-            banner.style.alignItems = 'center';
-            banner.style.paddingBottom = '10px';
+
             document.body.appendChild(banner);
         }
-        banner.innerHTML = `<span style="margin-left: 50px;">${channelIndex}. ${channelName}</span>`;
+
+        var html =
+            '<div style="font-size:22px;color:#aaa;">' +
+            channelIndex +
+            '</div>' +
+
+            '<div style="font-size:34px;font-weight:bold;">' +
+            escapeHtml(channelName) +
+            '</div>';
+
+        if (currentProgram) {
+            var progress =
+                getProgramProgress(currentProgram);
+
+            html +=
+                '<div style="font-size:28px;margin-top:8px;">' +
+                escapeHtml(currentProgram.title) +
+                '</div>' +
+
+                '<div style="font-size:18px;color:#bbb;margin-top:6px;">' +
+                formatTime(currentProgram.start) +
+                ' - ' +
+                formatTime(currentProgram.stop) +
+                '</div>' +
+
+                '<div style="' +
+                'height:5px;' +
+                'background:#444;' +
+                'margin-top:10px;' +
+                'width:70%;' +
+                '">' +
+                '<div style="' +
+                'height:100%;' +
+                'width:' + progress + '%;' +
+                'background:#e60000;' +
+                '"></div>' +
+                '</div>';
+        } else {
+            html +=
+                '<div style="font-size:22px;color:#aaa;margin-top:8px;">' +
+                'No EPG information' +
+                '</div>';
+        }
+
+        if (nextProgram) {
+            html +=
+                '<div style="font-size:18px;color:#999;margin-top:8px;">' +
+                'Next: ' +
+                escapeHtml(nextProgram.title) +
+                '</div>';
+        }
+
+        banner.innerHTML = html;
         banner.style.display = 'block';
-        
+
         clearTimeout(bannerTimeout);
 
-        banner.style.display = 'block';
-
-        bannerTimeout = setTimeout(function() {
+        bannerTimeout = setTimeout(function () {
             banner.style.display = 'none';
-        }, 3000);
+        }, 5000);
+    }
+
+    function updateChannelBanner() {
+        if (mode !== 'tv') {
+            return;
+        }
+
+        var channels = getCurrentChannels();
+        var index = getCurrentChannelIndex();
+        var channel = channels[index];
+
+        if (!channel) {
+            return;
+        }
+
+        var current = EPG.getCurrent(channel.epgId);
+        var next = EPG.getNext(channel.epgId, 1)[0];
+
+        showChannelBanner(
+            index + 1,
+            channel.name,
+            current,
+            next
+        );
     }
 
     loadChannel(currentTvChannelIndex);
+
+    loadEPG();
+
+    setInterval(function () {
+        if (mode === 'tv') {
+            updateChannelBanner();
+        }
+    }, 30000);
+
+    setInterval(function () {
+        loadEPG();
+    }, 6 * 60 * 60 * 1000);
 
     document.addEventListener('keydown', function(event) {
         
