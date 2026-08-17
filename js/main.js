@@ -2,25 +2,28 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('DOMContentLoaded event fired');
 
     var hls = null;
-
-    var EPG_URL = 'https://www.open-epg.com/files/norway.xml';
-
-    var epgLoading = false;
-    var epgError = null;
-
+    
     var audioPlayer = document.getElementById('audioPlayer');
     var videoPlayer = document.getElementById('videoPlayer');
+    
+    var EPG_SOURCES = {
+        norge: 'https://www.open-epg.com/files/norway.xml',
+        redbull: 'https://nzxmltv.com/iptv/redbull.xml'
+    };
+
+    var epgLoading = {};
+    var epgError = {};
 
     // Dummy list, to satisfy apps2samsung
     var channels = [];
 
     var tvChannels = [
         // Nrk
-        { name: 'NRK 1', epgId: 'NRK1Rogaland.no', url: 'https://nrk-live-no.akamaized.net/nrk1_dk7/muxed.m3u8' },
-        { name: 'NRK 2', epgId: 'NRK2.no', url: 'https://nrk-live-no.akamaized.net/nrk2/muxed.m3u8' },
-        { name: 'NRK 3', epgId: 'NRK3.no', url: 'https://nrk-live-no.akamaized.net/nrk3/muxed.m3u8'},
-        { name: 'NRK Super', epgId: 'NRKSuper.no', url: 'https://nrk-live-no.akamaized.net/nrksuper/muxed.m3u8' },
-        { name: 'NRK Teiknspråk', epgId: 'NRK1Tegnspraak.no', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' },
+        { name: 'NRK 1', epgId: 'NRK1Rogaland.no',  epgSource: 'norge', url: 'https://nrk-live-no.akamaized.net/nrk1_dk7/muxed.m3u8' },
+        { name: 'NRK 2', epgId: 'NRK2.no', epgSource: 'norge', url: 'https://nrk-live-no.akamaized.net/nrk2/muxed.m3u8' },
+        { name: 'NRK 3', epgId: 'NRK3.no', epgSource: 'norge', url: 'https://nrk-live-no.akamaized.net/nrk3/muxed.m3u8'},
+        { name: 'NRK Super', epgId: 'NRKSuper.no', epgSource: 'norge', url: 'https://nrk-live-no.akamaized.net/nrksuper/muxed.m3u8' },
+        { name: 'NRK Teiknspråk', epgId: 'NRK1Tegnspraak.no', epgSource: 'norge', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' },
             
         // Nrk Nett-TV
         { name: 'NRK Nett-TV 1', url: 'https://nrk-live-no.akamaized.net/nrktv4/muxed.m3u8' },
@@ -88,36 +91,71 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var bannerTimeout = 3000;
 
-    function loadEPG() {
-        if (epgLoading) {
-            return;
+    function loadEPG(sourceName) {
+        if (!sourceName) {
+            return Promise.reject(
+                new Error(
+                    'No EPG source provided'
+                )
+            );
         }
 
-        epgLoading = true;
-        epgError = null;
+        if (EPG.isLoaded(sourceName)) {
+            return Promise.resolve();
+        }
 
-        console.log('Loading EPG...');
+        if (epgLoading[sourceName]) {
+            return epgLoading[sourceName];
+        }
 
-        EPG.load(EPG_URL)
+        var url = EPG_SOURCES[sourceName];
+
+        if (!url) {
+            return Promise.reject(
+                new Error(
+                    'Unknown EPG source: ' + sourceName
+                )
+            );
+        }
+
+        epgError[sourceName] = null;
+
+        console.log(
+            'Loading EPG:',
+            sourceName,
+            url
+        );
+
+        epgLoading[sourceName] = EPG.load(
+            url,
+            sourceName
+        )
             .then(function () {
                 console.log(
                     'EPG loaded:',
-                    EPG.updatedAt()
+                    sourceName,
+                    EPG.updatedAt(sourceName)
                 );
 
-                epgLoading = false;
+                delete epgLoading[sourceName];
 
                 updateChannelBanner();
             })
             .catch(function (error) {
-                epgLoading = false;
-                epgError = error;
+                delete epgLoading[sourceName];
+
+                epgError[sourceName] = error;
 
                 console.error(
                     'Failed to load EPG:',
+                    sourceName,
                     error
                 );
+
+                throw error;
             });
+
+        return epgLoading[sourceName];
     }
 
     function loadChannel(index) {
@@ -126,16 +164,37 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (mode === 'radio') {
             loadRadioChannel(channel);
-        } else {
-            loadTVChannel(channel);
+            return;
         }
 
-        showChannelBanner(
-            index + 1,
-            channel.name,
-            EPG.getCurrent(channel.epgId),
-            EPG.getNext(channel.epgId, 1)[0]
-        );
+        loadTVChannel(channel);
+
+        var source = channel.epgSource;
+
+        loadEPG(source)
+            .then(function () {
+                showChannelBanner(
+                    index + 1,
+                    channel.name,
+                    EPG.getCurrent(
+                        channel.epgId,
+                        source
+                    ),
+                    EPG.getNext(
+                        channel.epgId,
+                        1,
+                        source
+                    )[0]
+                );
+            })
+            .catch(function () {
+                showChannelBanner(
+                    index + 1,
+                    channel.name,
+                    null,
+                    null
+                );
+            });
     }
 
     function loadTVChannel(channel) {
@@ -295,20 +354,42 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function toggleChannelBanner() {
-        var banner = document.getElementById('channelBanner');
+        var banner = document.getElementById(
+            'channelBanner'
+        );
+
         if (!banner || banner.style.display === 'none') {
             var currentChannels = getCurrentChannels();
             var index = getCurrentChannelIndex();
             var channel = currentChannels[index];
-            
-            showChannelBanner(
-                index + 1,
-                channel.name,
-                EPG.getCurrent(channel.epgId),
-                EPG.getNext(channel.epgId, 1)[0]
-            );
-        }
-        else {
+
+            var source = channel.epgSource;
+
+            loadEPG(source)
+                .then(function () {
+                    showChannelBanner(
+                        index + 1,
+                        channel.name,
+                        EPG.getCurrent(
+                            channel.epgId,
+                            source
+                        ),
+                        EPG.getNext(
+                            channel.epgId,
+                            1,
+                            source
+                        )[0]
+                    );
+                })
+                .catch(function () {
+                    showChannelBanner(
+                        index + 1,
+                        channel.name,
+                        null,
+                        null
+                    );
+                });
+        } else {
             hideChannelBanner();
         }
     }
@@ -451,12 +532,27 @@ document.addEventListener('DOMContentLoaded', function() {
         var index = getCurrentChannelIndex();
         var channel = channels[index];
 
-        if (!channel) {
+        if (!channel || !channel.epgId || !channel.epgSource) {
             return;
         }
 
-        var current = EPG.getCurrent(channel.epgId);
-        var next = EPG.getNext(channel.epgId, 1)[0];
+        var source = channel.epgSource;
+
+        if (!EPG.isLoaded(source)) {
+            loadEPG(source);
+            return;
+        }
+
+        var current = EPG.getCurrent(
+            channel.epgId,
+            source
+        );
+
+        var next = EPG.getNext(
+            channel.epgId,
+            1,
+            source
+        )[0];
 
         showChannelBanner(
             index + 1,

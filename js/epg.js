@@ -1,33 +1,16 @@
 /*
  * XMLTV EPG parser for TVapp
  *
- * Converts XMLTV into:
- * {
- *   "NRK1.no": [
- *      {
- *        start: Date,
- *        stop: Date,
- *        title: "...",
- *        description: "...",
- *        category: "..."
- *      }
- *   ]
- * }
+ * Supports multiple EPG sources.
  */
-
 var EPG = (function () {
     'use strict';
 
-    var programs = {};
-    var loaded = false;
-    var lastUpdated = 0;
+    var sources = {};
 
     function parseXmltvDate(value) {
         if (!value) return null;
 
-        // XMLTV format:
-        // 20260817180000 +0200
-        // 20260817180000
         var match = value.match(
             /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(?:\s*([+-])(\d{2})(\d{2}))?/
         );
@@ -79,9 +62,15 @@ var EPG = (function () {
         return element ? element.textContent.trim() : '';
     }
 
-    function parse(xml) {
+    function parse(xml, sourceName) {
+        if (!sourceName)
+            throw new Error('no sourceName provided');
+
         var parser = new DOMParser();
-        var document = parser.parseFromString(xml, 'application/xml');
+        var document = parser.parseFromString(
+            xml,
+            'application/xml'
+        );
 
         if (!document || document.querySelector('parsererror')) {
             throw new Error('Invalid XMLTV document');
@@ -94,8 +83,12 @@ var EPG = (function () {
             var entry = entries[i];
 
             var channelId = entry.getAttribute('channel');
-            var start = parseXmltvDate(entry.getAttribute('start'));
-            var stop = parseXmltvDate(entry.getAttribute('stop'));
+            var start = parseXmltvDate(
+                entry.getAttribute('start')
+            );
+            var stop = parseXmltvDate(
+                entry.getAttribute('stop')
+            );
 
             if (!channelId || !start || !stop) {
                 continue;
@@ -125,18 +118,26 @@ var EPG = (function () {
 
         Object.keys(result).forEach(function (channel) {
             result[channel].sort(function (a, b) {
-                return a.start.getTime() - b.start.getTime();
+                return (
+                    a.start.getTime() -
+                    b.start.getTime()
+                );
             });
         });
 
-        programs = result;
-        loaded = true;
-        lastUpdated = Date.now();
+        sources[sourceName] = {
+            programs: result,
+            loaded: true,
+            lastUpdated: Date.now()
+        };
 
         return result;
     }
 
-    function load(url) {
+    function load(url, sourceName) {
+        if (!sourceName)
+            throw new Error('no sourceName provided');
+        
         return fetch(url, {
             method: 'GET',
             cache: 'no-cache'
@@ -144,24 +145,46 @@ var EPG = (function () {
             .then(function (response) {
                 if (!response.ok) {
                     throw new Error(
-                        'EPG HTTP error: ' + response.status
+                        'EPG HTTP error: ' +
+                        response.status
                     );
                 }
 
                 return response.text();
             })
             .then(function (xml) {
-                return parse(xml);
+                return parse(xml, sourceName);
             });
     }
 
-    function get(channelId) {
-        return programs[channelId] || [];
+    function getSource(sourceName) {
+        if (!sourceName)
+            throw new Error('no sourceName provided');
+
+        sourceName = sourceName || 'default';
+
+        return sources[sourceName] || {
+            programs: {},
+            loaded: false,
+            lastUpdated: 0
+        };
     }
 
-    function getCurrent(channelId) {
+    function get(channelId, sourceName) {
+        if (!sourceName)
+            throw new Error('no sourceName provided');
+        
+        var source = getSource(sourceName);
+
+        return source.programs[channelId] || [];
+    }
+
+    function getCurrent(channelId, sourceName) {
+        if (!sourceName)
+            throw new Error('no sourceName provided');
+
         var now = Date.now();
-        var list = get(channelId);
+        var list = get(channelId, sourceName);
 
         for (var i = 0; i < list.length; i++) {
             if (
@@ -175,11 +198,14 @@ var EPG = (function () {
         return null;
     }
 
-    function getNext(channelId, count) {
+    function getNext(channelId, count, sourceName) {
+        if (!sourceName)
+            throw new Error('no sourceName provided');
+
         count = count || 1;
 
         var now = Date.now();
-        var list = get(channelId);
+        var list = get(channelId, sourceName);
         var result = [];
 
         for (var i = 0; i < list.length; i++) {
@@ -195,12 +221,12 @@ var EPG = (function () {
         return result;
     }
 
-    function isLoaded() {
-        return loaded;
+    function isLoaded(sourceName) {
+        return getSource(sourceName).loaded;
     }
 
-    function updatedAt() {
-        return lastUpdated;
+    function updatedAt(sourceName) {
+        return getSource(sourceName).lastUpdated;
     }
 
     return {
