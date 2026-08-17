@@ -164,26 +164,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (mode === 'radio') {
             loadRadioChannel(channel);
-            return;
+        }
+        else {   
+            loadTVChannel(channel);
         }
 
-        loadTVChannel(channel);
-
-        var source = channel.epgSource;
-
-        loadEPG(source)
+        if (channel.epgId && channel.epgSource) {
+            loadEPG(channel.epgSource)
             .then(function () {
                 showChannelBanner(
                     index + 1,
                     channel.name,
                     EPG.getCurrent(
                         channel.epgId,
-                        source
+                        channel.epgSource
                     ),
                     EPG.getNext(
                         channel.epgId,
                         1,
-                        source
+                        channel.epgSource
                     )[0]
                 );
             })
@@ -195,29 +194,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     null
                 );
             });
+        }
+        else {
+            showChannelBanner(
+                index + 1,
+                channel.name,
+                null,
+                null
+            );
+        }
     }
 
     function loadTVChannel(channel) {
         console.log('Loading TV:', channel.name);
-
-        // Stop radio
-        audioPlayer.pause();
-        audioPlayer.removeAttribute('src');
-        audioPlayer.load();
-
-        // Stop previous HLS instance
-        if (hls) {
-            hls.destroy();
-            hls = null;
-        }
 
         videoPlayer.style.display = 'block';
 
         if (Hls.isSupported()) {
             console.log('HLS.js is supported');
 
-            hls = new Hls();
+            if (hls) {
+                hls.destroy();
+                hls = null;
+            }
 
+            hls = new Hls();
             hls.loadSource(channel.url);
             hls.attachMedia(videoPlayer);
 
@@ -258,39 +259,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadRadioChannel(channel) {
         console.log('Loading radio:', channel.name);
 
-        // Stop TV
-        videoPlayer.pause();
-
-        if (hls) {
-            hls.destroy();
-            hls = null;
-        }
-
-        videoPlayer.removeAttribute('src');
-        videoPlayer.load();
-
-        // Hide video
-        videoPlayer.style.display = 'none';
-
-        // Play radio using HTML5 audio
-        audioPlayer.style.display = 'none';
-
         audioPlayer.pause();
         audioPlayer.src = channel.url;
-        audioPlayer.load();
 
-        audioPlayer.oncanplay = function() {
-            console.log('Radio ready:', channel.name);
-
-            audioPlayer.play().catch(function(error) {
-                console.error('Radio play error:', error);
-            });
-        };
-
-        audioPlayer.onerror = function(event) {
-            console.error('Radio player error:', event);
-            console.error('Audio error code:', audioPlayer.error);
-        };
+        audioPlayer.play().catch(function(error) {
+            console.error('Radio play error:', error);
+        });
     }
 
     function getCurrentChannels() {
@@ -336,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function switchMode() {
-        if (mode == 'radio') {
+        if (mode === 'radio') {
             switchToTV();
         } else {
             switchToRadio();
@@ -345,11 +319,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function switchToTV() {
         mode = 'tv';
+
+        audioPlayer.pause();
+        audioPlayer.removeAttribute('src');
+        audioPlayer.load();
+
+        videoPlayer.style.display = 'block';
+
         loadChannel(currentTvChannelIndex);
     }
 
     function switchToRadio() {
         mode = 'radio';
+
+        videoPlayer.pause();
+
+        if (hls) {
+            hls.destroy();
+            hls = null;
+        }
+
+        videoPlayer.removeAttribute('src');
+        videoPlayer.load();
+        videoPlayer.style.display = 'none';
+
         loadChannel(currentRadioChannelIndex);
     }
 
@@ -363,21 +356,21 @@ document.addEventListener('DOMContentLoaded', function() {
             var index = getCurrentChannelIndex();
             var channel = currentChannels[index];
 
-            var source = channel.epgSource;
-
-            loadEPG(source)
+            if (channel.epgId && channel.epgSource)
+            {
+                loadEPG(channel.epgSource)
                 .then(function () {
                     showChannelBanner(
                         index + 1,
                         channel.name,
                         EPG.getCurrent(
                             channel.epgId,
-                            source
+                            channel.epgSource
                         ),
                         EPG.getNext(
                             channel.epgId,
                             1,
-                            source
+                            channel.epgSource
                         )[0]
                     );
                 })
@@ -389,6 +382,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         null
                     );
                 });
+            }
+            else {
+                showChannelBanner(
+                        index + 1,
+                        channel.name,
+                        null,
+                        null
+                    );
+            }
         } else {
             hideChannelBanner();
         }
