@@ -524,35 +524,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateChannelBanner() {
-        if (mode !== 'tv') {
-            return;
-        }
-
         var channels = getCurrentChannels();
         var index = getCurrentChannelIndex();
         var channel = channels[index];
 
-        if (!channel || !channel.epgId || !channel.epgSource) {
+        if (!channel) {
             return;
         }
 
-        var source = channel.epgSource;
+        var current = null;
+        var next = null;
 
-        if (!EPG.isLoaded(source)) {
-            loadEPG(source);
-            return;
+        if (channel.epgId && channel.epgSource) {
+            current = EPG.getCurrent(
+                channel.epgId,
+                channel.epgSource
+            );
+
+            next = EPG.getNext(
+                channel.epgId,
+                1,
+                channel.epgSource
+            )[0];
         }
-
-        var current = EPG.getCurrent(
-            channel.epgId,
-            source
-        );
-
-        var next = EPG.getNext(
-            channel.epgId,
-            1,
-            source
-        )[0];
 
         showChannelBanner(
             index + 1,
@@ -567,9 +561,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadEPG();
 
     setInterval(function () {
-        if (mode === 'tv') {
-            updateChannelBanner();
-        }
+        updateChannelBanner();
     }, 30000);
 
     setInterval(function () {
