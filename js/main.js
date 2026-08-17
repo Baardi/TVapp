@@ -501,7 +501,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             html +=
                 '<div style="font-size:22px;color:#aaa;margin-top:8px;">' +
-                'No EPG information' +
+                'Ingen programinformasjon tilgjengeleg' +
                 '</div>';
         }
 
