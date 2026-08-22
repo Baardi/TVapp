@@ -261,9 +261,17 @@ document.addEventListener('DOMContentLoaded', function() {
         audioPlayer.pause();
         audioPlayer.src = channel.url;
 
-        audioPlayer.play().catch(function(error) {
+        try {
+            var playResult = audioPlayer.play();
+
+            if (playResult && typeof playResult.catch === 'function') {
+                playResult.catch(function(error) {
+                    console.error('Radio play error:', error);
+                });
+            }
+        } catch (error) {
             console.error('Radio play error:', error);
-        });
+        }
     }
 
     function getCurrentChannels() {
@@ -525,9 +533,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateChannelBanner() {
-        var channels = getCurrentChannels();
+        var banner = document.getElementById('channelBanner');
+
+        if (!banner || banner.style.display === 'none') {
+            return;
+        }
+
+        var currentChannels = getCurrentChannels();
         var index = getCurrentChannelIndex();
-        var channel = channels[index];
+        var channel = currentChannels[index];
 
         if (!channel) {
             return;
@@ -559,14 +573,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     loadChannel(currentTvChannelIndex);
 
-    loadEPG();
+    Object.keys(EPG_SOURCES).forEach(function (name) {
+        loadEPG(name);
+    });
 
     setInterval(function () {
-        updateChannelBanner();
-    }, 30000);
-
-    setInterval(function () {
-        loadEPG();
+        Object.keys(EPG_SOURCES).forEach(function (name) {
+            loadEPG(name);
+        });
     }, 6 * 60 * 60 * 1000);
 
     document.addEventListener('keydown', function(event) {
