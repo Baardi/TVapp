@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var epgLoading = {};
     var epgError = {};
 
+    tizen.tvinputdevice.registerKey('ChannelUp');
+    tizen.tvinputdevice.registerKey('ChannelDown');
+
     // Dummy list, to satisfy apps2samsung
     var channels = [];
 
@@ -568,9 +571,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         switch (event.keyCode) {
             case 38: // Arrow Up
+            case 427: // Channel Up
                 changeChannel(1);
                 break;
-            case 40: // Arrow Up
+            case 40: // Arrow Down
+            case 428: // Channel Down 
                 changeChannel(-1);
                 break;
             case 37: // Arrow left
