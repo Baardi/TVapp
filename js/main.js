@@ -7,7 +7,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var videoPlayer = document.getElementById('videoPlayer');
     
     var EPG_SOURCES = {
-        norge: 'https://www.open-epg.com/files/norway.xml',
+        nrkxml1: 'https://iptv-epg.org/files/epg-no.xml',
+        nrkxml2: 'https://www.open-epg.com/files/norway.xml',
+        frikanalen: 'https://frikanalen.no/xmltv/upcoming',
         redbull: 'https://nzxmltv.com/iptv/redbull.xml'
     };
 
@@ -22,11 +24,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var tvChannels = [
         // Nrk
-        { name: 'NRK 1', epgId: 'NRK1Rogaland.no',  epgSource: 'norge', url: 'https://nrk-live-no.akamaized.net/nrk1_dk7/muxed.m3u8' },
-        { name: 'NRK 2', epgId: 'NRK2.no', epgSource: 'norge', url: 'https://nrk-live-no.akamaized.net/nrk2/muxed.m3u8' },
-        { name: 'NRK 3', epgId: 'NRK3.no', epgSource: 'norge', url: 'https://nrk-live-no.akamaized.net/nrk3/muxed.m3u8'},
-        { name: 'NRK Super', epgId: 'NRKSuper.no', epgSource: 'norge', url: 'https://nrk-live-no.akamaized.net/nrksuper/muxed.m3u8' },
-        { name: 'NRK Teiknspråk', epgId: 'NRK1Tegnspraak.no', epgSource: 'norge', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' },
+        { name: 'NRK 1', epgId: 'NRK1.no',  epgSource: 'nrkxml1', url: 'https://nrk-live-no.akamaized.net/nrk1_dk7/muxed.m3u8' },
+        { name: 'NRK 2', epgId: 'NRK2.no', epgSource: 'nrkxml1', url: 'https://nrk-live-no.akamaized.net/nrk2/muxed.m3u8' },
+        { name: 'NRK 3', epgId: 'NRK3.no', epgSource: 'nrkxml1', url: 'https://nrk-live-no.akamaized.net/nrk3/muxed.m3u8'},
+        { name: 'NRK Super', epgId: 'NRKSuper.no', epgSource: 'nrkxml2', url: 'https://nrk-live-no.akamaized.net/nrksuper/muxed.m3u8' },
+        { name: 'NRK Teiknspråk', epgId: 'NRK1Tegnspraak.no', epgSource: 'nrkxml2', url: 'https://nrk-live-no.akamaized.net/nrk_tegnspraak/muxed.m3u8' },
             
         // Nrk Nett-TV
         { name: 'NRK Nett-TV 1', url: 'https://nrk-live-no.akamaized.net/nrktv4/muxed.m3u8' },
@@ -35,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'NRK Nett-TV 4', url: 'https://nrk-live-no.akamaized.net/nrktv7/muxed.m3u8' },        
         
         // Frikanalen
-        { name: 'Frikanalen', epgId: 'Frikanalen.no', epgSource: 'norge', url: 'https://frikanalen.no/stream/index.m3u8' },
+        { name: 'Frikanalen', epgId: 'frikanalen.tv', epgSource: 'frikanalen', url: 'https://frikanalen.no/stream/index.m3u8' },
         
         // Red Bull TV
         { name: 'Red Bull TV', epgId: '10001', epgSource: 'redbull', url: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8' }
