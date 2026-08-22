@@ -77,13 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'P10 Country', url: 'https://p10.p4groupaudio.com/P10_AH' },
         { name: 'P11 Dance', url: 'https://p11.p4groupaudio.com/P11_AH' },
         { name: 'P12 Hitmix', url: 'https://p12.p4groupaudio.com/P12_AH' },
-        { name: 'P5 Nonstop Hits', url: 'https://p5n.p4groupaudio.com/P05AAH' },
-
-        // 1FM
-        { name: '1FM', url: 'https://lyd.1fm.no/1fm_hq' },
-        { name: '1FM Gull', url: 'https://lyd.1fm.no/1fmgull_hq' },
-        { name: '1FM Rock', url: 'https://lyd.1fm.no/1fmrock_hq' },
-        { name: '1FM Jazz', url: 'https://lyd.1fm.no/1fmjazz_hq' }
+        { name: 'P5 Nonstop Hits', url: 'https://p5n.p4groupaudio.com/P05AAH' }
     ];
     var currentRadioChannelIndex = 0;
     
